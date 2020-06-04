@@ -1,5 +1,8 @@
 package br.com.profsalu.controle;
 
+import javax.swing.JOptionPane;
+
+import br.com.profsalu.excecao.SalarioAcimaDoTetoException;
 import br.com.profsalu.modelo.Vendedor;
 import br.com.profsalu.visao.VisaoVendedor;
 
@@ -16,7 +19,7 @@ public class ControleVendedor {
 		String nome = visao.lerNome();
 		
 		if(nome.length() < 3) {
-			System.out.println("O nome deve possuir mais que 2 caracteres");
+			throw new IllegalArgumentException("Nome deve possui pelo menos 3 caracteres");
 		}
 		return nome;
 	}
@@ -24,15 +27,27 @@ public class ControleVendedor {
 	private double getSalario() {
 		double salario = visao.lerSalario();
 		
-		if(salario > 10000) {
-			System.out.println("O salario nao pode ser maior que o teto da empresa.");
-		}
-		return salario;
+		try {
+			if(salario > 10000) {
+				throw new SalarioAcimaDoTetoException();
+			}
+			return salario;
+		}catch(SalarioAcimaDoTetoException e) {
+			JOptionPane.showMessageDialog(null, e);
+			return getSalario();
+		}		
 	}
 	
 	public Vendedor getVendedor() {
-		modelo.setNome(getNome());
+		try {
+			modelo.setNome(getNome());
+		}catch(IllegalArgumentException e) {
+			JOptionPane.showMessageDialog(null, e);
+			modelo.setNome(getNome());
+		}
+		
 		modelo.setSalario(getSalario());
+		
 		visao.exibirVendedor(modelo);
 		return modelo;
 	}
